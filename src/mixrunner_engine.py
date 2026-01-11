@@ -13,7 +13,7 @@ from .analyzers import PhaseAnalyzer, GainAnalyzer, FrequencyAnalyzer
 from .processors import SessionCleaner, AudioNormalizer
 
 
-class MixReadinessEngine:
+class MixrunnerEngine:
     """
     Main engine that orchestrates the complete mix preparation workflow
     """
