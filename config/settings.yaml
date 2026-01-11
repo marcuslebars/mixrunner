@@ -1,0 +1,157 @@
+# Mix Readiness AI Configuration
+
+# Target Audio Levels
+target_lufs: -18.0  # Integrated loudness target
+target_peak: -6.0   # Peak level target (dBFS)
+headroom: 6.0       # Desired headroom in dB
+
+# Session Cleanup Options
+cleanup:
+  remove_empty_tracks: true
+  remove_muted_tracks: false  # Keep muted for safety
+  find_unused_files: true
+  consolidate_takes: false    # Requires manual operation
+  remove_automation: false    # Requires manual review
+
+# Track Organization
+organization:
+  auto_organize: true
+  auto_color: true
+  auto_rename: true
+  create_buses: true
+  create_stacks: false  # Limited AppleScript support
+
+  # Track ordering (top to bottom)
+  track_order:
+    - drums
+    - percussion
+    - bass
+    - guitar
+    - keys
+    - strings
+    - brass
+    - vocals
+    - lead_vocal
+    - bgv
+    - fx
+    - bus
+    - aux
+
+# Color Scheme (Logic Pro color indices 0-30)
+colors:
+  kick: 1          # Red
+  snare: 1         # Red
+  hihat: 2         # Light Red
+  drums: 3         # Orange Red
+  percussion: 4    # Orange
+  bass: 6          # Purple
+  synth_bass: 7    # Light Purple
+  guitar: 9        # Orange
+  electric_guitar: 9
+  acoustic_guitar: 10
+  keys: 12         # Yellow
+  piano: 12
+  synth: 13        # Light Yellow
+  organ: 14
+  pad: 15          # Green
+  strings: 15      # Green
+  violin: 15
+  cello: 15
+  brass: 8         # Brown
+  trumpet: 8
+  sax: 8
+  lead_vocal: 19   # Bright Pink
+  vocal: 18        # Pink
+  bgv: 20          # Light Pink
+  choir: 21        # Very Light Pink
+  fx: 25           # Blue
+  ambient: 26      # Light Blue
+  bus: 28          # Gray
+  aux: 28          # Gray
+  default: 0       # No color
+
+# Naming Conventions
+naming:
+  templates:
+    kick: "KICK"
+    snare: "SNR"
+    hihat: "HH"
+    drums: "DRUMS"
+    percussion: "PERC"
+    bass: "BASS"
+    guitar: "GTR"
+    electric_guitar: "E-GTR"
+    acoustic_guitar: "A-GTR"
+    keys: "KEYS"
+    piano: "PIANO"
+    synth: "SYNTH"
+    organ: "ORGAN"
+    pad: "PAD"
+    strings: "STRINGS"
+    brass: "BRASS"
+    lead_vocal: "LEAD VOX"
+    vocal: "VOX"
+    bgv: "BGV"
+    fx: "FX"
+    bus: "BUS"
+    aux: "AUX"
+
+  # Numbering format
+  use_numbering: true
+  number_format: "{prefix} {number}"  # e.g., "GTR 1", "GTR 2"
+
+# Bus/Aux Creation
+buses:
+  create_drum_bus: true
+  create_vocal_bus: true
+  create_instrument_bus: false
+  create_fx_bus: true
+
+  bus_names:
+    drums: "DRUMS BUS"
+    vocals: "VOCALS BUS"
+    instruments: "INSTRUMENTS BUS"
+    fx: "FX BUS"
+
+# Audio Normalization
+normalization:
+  enabled: true
+  method: "loudness"  # 'peak', 'loudness', or 'rms'
+  match_levels: true  # Match all tracks to same average level
+  create_backup: true  # Backup files before processing
+
+# Phase Analysis
+phase:
+  check_stereo_files: true
+  auto_correct: false  # Requires manual review
+  correlation_threshold: 0.3  # Warn if below this
+
+# Frequency Analysis
+frequency:
+  analyze_spectrum: true
+  suggest_eq: true
+  detect_issues: true
+
+# AI Classification
+ai:
+  use_name_classification: true
+  use_audio_classification: false  # Requires audio analysis
+  confidence_threshold: 0.5
+  model_path: null  # Path to custom trained model
+
+# Performance
+performance:
+  max_audio_files_analyze: 50  # Limit for batch operations
+  analysis_duration: 30.0      # Seconds of audio to analyze
+  sample_rate: 22050           # Analysis sample rate
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: null  # Path to log file (null = console only)
+
+# Advanced
+advanced:
+  skip_confirmation: false
+  auto_save: false
+  create_session_backup: true
