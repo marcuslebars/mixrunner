@@ -20,9 +20,26 @@ class MixreadyControlPanel:
         if root is None:
             self.root = tk.Tk()
             self.root.title("Mixrunner AI - Logic Pro Session Optimizer")
-            self.root.geometry("800x900")
+            self.root.geometry("900x950")
         else:
             self.root = root
+
+        # Modern color scheme
+        self.colors = {
+            'bg_dark': '#1e1e1e',
+            'bg_medium': '#2d2d2d',
+            'bg_light': '#3c3c3c',
+            'accent': '#0d7fc9',
+            'accent_hover': '#0a5f96',
+            'success': '#4caf50',
+            'warning': '#ff9800',
+            'error': '#f44336',
+            'text': '#ffffff',
+            'text_dim': '#b0b0b0',
+            'border': '#4a4a4a'
+        }
+
+        self.root.configure(bg=self.colors['bg_dark'])
 
         self.engine = MixrunnerEngine()
         self.is_connected = False
@@ -32,28 +49,100 @@ class MixreadyControlPanel:
 
     def _build_ui(self):
         """Build the user interface"""
-        # Style
+        # Modern Style Configuration
         style = ttk.Style()
         style.theme_use('clam')
 
-        # Main container
-        main_frame = ttk.Frame(self.root, padding="10")
+        # Configure modern dark theme
+        style.configure('.',
+            background=self.colors['bg_dark'],
+            foreground=self.colors['text'],
+            fieldbackground=self.colors['bg_medium'],
+            borderwidth=0
+        )
+
+        style.configure('TFrame',
+            background=self.colors['bg_dark']
+        )
+
+        style.configure('TLabel',
+            background=self.colors['bg_dark'],
+            foreground=self.colors['text']
+        )
+
+        style.configure('TLabelframe',
+            background=self.colors['bg_dark'],
+            foreground=self.colors['text'],
+            borderwidth=1,
+            relief='solid'
+        )
+
+        style.configure('TLabelframe.Label',
+            background=self.colors['bg_dark'],
+            foreground=self.colors['accent'],
+            font=('Helvetica', 11, 'bold')
+        )
+
+        style.configure('TButton',
+            background=self.colors['bg_light'],
+            foreground=self.colors['text'],
+            borderwidth=1,
+            relief='flat',
+            padding=(15, 8)
+        )
+
+        style.map('TButton',
+            background=[('active', self.colors['accent'])],
+            foreground=[('active', self.colors['text'])]
+        )
+
+        style.configure('Accent.TButton',
+            background=self.colors['accent'],
+            foreground=self.colors['text'],
+            font=('Helvetica', 10, 'bold')
+        )
+
+        style.map('Accent.TButton',
+            background=[('active', self.colors['accent_hover'])]
+        )
+
+        style.configure('TCheckbutton',
+            background=self.colors['bg_dark'],
+            foreground=self.colors['text']
+        )
+
+        style.configure('TEntry',
+            fieldbackground=self.colors['bg_medium'],
+            foreground=self.colors['text'],
+            insertcolor=self.colors['text']
+        )
+
+        # Main container with padding
+        main_frame = tk.Frame(self.root, bg=self.colors['bg_dark'], padx=20, pady=20)
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-        # Header
-        header = ttk.Label(
-            main_frame,
-            text="Mixrunner AI",
-            font=('Helvetica', 24, 'bold')
-        )
-        header.grid(row=0, column=0, columnspan=2, pady=(0, 10))
+        # Modern Header with gradient effect
+        header_frame = tk.Frame(main_frame, bg=self.colors['bg_medium'], height=100)
+        header_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 20))
+        header_frame.grid_propagate(False)
 
-        subtitle = ttk.Label(
-            main_frame,
-            text="Intelligent Logic Pro Session Preparation",
-            font=('Helvetica', 12)
+        header = tk.Label(
+            header_frame,
+            text="MIXRUNNER AI",
+            font=('Helvetica', 32, 'bold'),
+            bg=self.colors['bg_medium'],
+            fg=self.colors['accent']
         )
-        subtitle.grid(row=1, column=0, columnspan=2, pady=(0, 20))
+        header.pack(pady=(15, 0))
+
+        subtitle = tk.Label(
+            header_frame,
+            text="Intelligent Logic Pro Session Optimizer",
+            font=('Helvetica', 13),
+            bg=self.colors['bg_medium'],
+            fg=self.colors['text_dim']
+        )
+        subtitle.pack(pady=(0, 10))
 
         # Connection Section
         self._build_connection_section(main_frame, row=2)
@@ -78,107 +167,148 @@ class MixreadyControlPanel:
 
     def _build_connection_section(self, parent, row):
         """Build connection controls"""
-        frame = ttk.LabelFrame(parent, text="Logic Pro Connection", padding="10")
-        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        frame = ttk.LabelFrame(parent, text="  LOGIC PRO CONNECTION  ", padding="15")
+        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
 
         self.connect_btn = ttk.Button(
             frame,
-            text="Connect to Logic Pro",
-            command=self._connect_to_logic
+            text="⚡ Connect to Logic Pro",
+            command=self._connect_to_logic,
+            width=25
         )
         self.connect_btn.grid(row=0, column=0, padx=5)
 
-        self.connection_status = ttk.Label(frame, text="Not Connected", foreground="red")
-        self.connection_status.grid(row=0, column=1, padx=10)
+        # Status indicator with colored dot
+        status_frame = tk.Frame(frame, bg=self.colors['bg_dark'])
+        status_frame.grid(row=0, column=1, padx=20, sticky=tk.W)
+
+        self.status_dot = tk.Label(
+            status_frame,
+            text="●",
+            font=('Helvetica', 16),
+            bg=self.colors['bg_dark'],
+            fg=self.colors['error']
+        )
+        self.status_dot.pack(side=tk.LEFT, padx=(0, 8))
+
+        self.connection_status = tk.Label(
+            status_frame,
+            text="Not Connected",
+            font=('Helvetica', 11),
+            bg=self.colors['bg_dark'],
+            fg=self.colors['error']
+        )
+        self.connection_status.pack(side=tk.LEFT)
 
     def _build_config_section(self, parent, row):
         """Build configuration options"""
-        frame = ttk.LabelFrame(parent, text="Configuration", padding="10")
-        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        frame = ttk.LabelFrame(parent, text="  CONFIGURATION  ", padding="15")
+        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
 
-        # Checkboxes for options
+        # Left column - Checkboxes
+        left_frame = tk.Frame(frame, bg=self.colors['bg_dark'])
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.N), padx=(0, 30))
+
         self.var_cleanup = tk.BooleanVar(value=True)
         ttk.Checkbutton(
-            frame,
-            text="Remove empty tracks",
+            left_frame,
+            text="✓ Remove empty tracks",
             variable=self.var_cleanup
-        ).grid(row=0, column=0, sticky=tk.W, pady=2)
+        ).grid(row=0, column=0, sticky=tk.W, pady=5)
 
         self.var_organize = tk.BooleanVar(value=True)
         ttk.Checkbutton(
-            frame,
-            text="Auto-organize tracks",
+            left_frame,
+            text="✓ Auto-organize tracks",
             variable=self.var_organize
-        ).grid(row=1, column=0, sticky=tk.W, pady=2)
+        ).grid(row=1, column=0, sticky=tk.W, pady=5)
 
         self.var_color = tk.BooleanVar(value=True)
         ttk.Checkbutton(
-            frame,
-            text="Apply color scheme",
+            left_frame,
+            text="✓ Apply color scheme",
             variable=self.var_color
-        ).grid(row=2, column=0, sticky=tk.W, pady=2)
+        ).grid(row=2, column=0, sticky=tk.W, pady=5)
 
         self.var_normalize = tk.BooleanVar(value=True)
         ttk.Checkbutton(
-            frame,
-            text="Normalize audio levels",
+            left_frame,
+            text="✓ Normalize audio levels",
             variable=self.var_normalize
-        ).grid(row=3, column=0, sticky=tk.W, pady=2)
+        ).grid(row=3, column=0, sticky=tk.W, pady=5)
 
-        # Target levels
-        ttk.Label(frame, text="Target LUFS:").grid(row=0, column=1, padx=(20, 5))
-        self.lufs_entry = ttk.Entry(frame, width=8)
+        # Right column - Target levels
+        right_frame = tk.Frame(frame, bg=self.colors['bg_dark'])
+        right_frame.grid(row=0, column=1, sticky=(tk.W, tk.N))
+
+        tk.Label(
+            right_frame,
+            text="Target LUFS:",
+            font=('Helvetica', 10),
+            bg=self.colors['bg_dark'],
+            fg=self.colors['text_dim']
+        ).grid(row=0, column=0, sticky=tk.W, pady=5)
+
+        self.lufs_entry = ttk.Entry(right_frame, width=10, font=('Helvetica', 10))
         self.lufs_entry.insert(0, "-18.0")
-        self.lufs_entry.grid(row=0, column=2)
+        self.lufs_entry.grid(row=0, column=1, padx=(10, 0), pady=5)
 
-        ttk.Label(frame, text="Target Peak (dB):").grid(row=1, column=1, padx=(20, 5))
-        self.peak_entry = ttk.Entry(frame, width=8)
+        tk.Label(
+            right_frame,
+            text="Target Peak (dB):",
+            font=('Helvetica', 10),
+            bg=self.colors['bg_dark'],
+            fg=self.colors['text_dim']
+        ).grid(row=1, column=0, sticky=tk.W, pady=5)
+
+        self.peak_entry = ttk.Entry(right_frame, width=10, font=('Helvetica', 10))
         self.peak_entry.insert(0, "-6.0")
-        self.peak_entry.grid(row=1, column=2)
+        self.peak_entry.grid(row=1, column=1, padx=(10, 0), pady=5)
 
     def _build_actions_section(self, parent, row):
         """Build action buttons"""
-        frame = ttk.LabelFrame(parent, text="Actions", padding="10")
-        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        frame = ttk.LabelFrame(parent, text="  ACTIONS  ", padding="15")
+        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
 
-        # Row 1
+        # Row 1 - Primary actions
         ttk.Button(
             frame,
-            text="Analyze Session",
+            text="📊 Analyze Session",
             command=self._analyze_session
         ).grid(row=0, column=0, padx=5, pady=5, sticky=(tk.W, tk.E))
 
         ttk.Button(
             frame,
-            text="Clean Up",
+            text="🧹 Clean Up",
             command=self._cleanup_session
         ).grid(row=0, column=1, padx=5, pady=5, sticky=(tk.W, tk.E))
 
         ttk.Button(
             frame,
-            text="Organize Tracks",
+            text="📁 Organize Tracks",
             command=self._organize_tracks
         ).grid(row=0, column=2, padx=5, pady=5, sticky=(tk.W, tk.E))
 
-        # Row 2
+        # Row 2 - Secondary actions
         ttk.Button(
             frame,
-            text="Normalize Audio",
+            text="🎚️ Normalize Audio",
             command=self._normalize_audio
         ).grid(row=1, column=0, padx=5, pady=5, sticky=(tk.W, tk.E))
 
         ttk.Button(
             frame,
-            text="Full Workflow",
-            command=self._run_full_workflow,
-            style="Accent.TButton"
+            text="📄 Generate Report",
+            command=self._generate_report
         ).grid(row=1, column=1, padx=5, pady=5, sticky=(tk.W, tk.E))
 
+        # Row 3 - Full workflow (prominent)
         ttk.Button(
             frame,
-            text="Generate Report",
-            command=self._generate_report
-        ).grid(row=1, column=2, padx=5, pady=5, sticky=(tk.W, tk.E))
+            text="🚀 RUN FULL WORKFLOW",
+            command=self._run_full_workflow,
+            style="Accent.TButton"
+        ).grid(row=2, column=0, columnspan=3, padx=5, pady=(10, 5), sticky=(tk.W, tk.E))
 
         # Configure column weights
         for i in range(3):
@@ -186,14 +316,23 @@ class MixreadyControlPanel:
 
     def _build_log_section(self, parent, row):
         """Build output log"""
-        frame = ttk.LabelFrame(parent, text="Output Log", padding="10")
-        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        frame = ttk.LabelFrame(parent, text="  OUTPUT LOG  ", padding="15")
+        frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
 
         self.log_text = scrolledtext.ScrolledText(
             frame,
             wrap=tk.WORD,
             height=20,
-            font=('Courier', 9)
+            font=('Consolas', 10),
+            bg=self.colors['bg_medium'],
+            fg=self.colors['text'],
+            insertbackground=self.colors['accent'],
+            selectbackground=self.colors['accent'],
+            selectforeground=self.colors['text'],
+            borderwidth=0,
+            highlightthickness=1,
+            highlightbackground=self.colors['border'],
+            highlightcolor=self.colors['accent']
         )
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
@@ -202,13 +341,20 @@ class MixreadyControlPanel:
 
     def _build_status_bar(self, parent, row):
         """Build status bar"""
-        self.status_bar = ttk.Label(
-            parent,
+        status_frame = tk.Frame(parent, bg=self.colors['bg_medium'], height=35)
+        status_frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        status_frame.grid_propagate(False)
+
+        self.status_bar = tk.Label(
+            status_frame,
             text="Ready",
-            relief=tk.SUNKEN,
-            anchor=tk.W
+            bg=self.colors['bg_medium'],
+            fg=self.colors['text_dim'],
+            font=('Helvetica', 10),
+            anchor=tk.W,
+            padx=10
         )
-        self.status_bar.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        self.status_bar.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
 
     def _log(self, message: str):
         """Add message to log"""
@@ -230,11 +376,19 @@ class MixreadyControlPanel:
 
         if success:
             self.is_connected = True
-            self.connection_status.config(text="Connected", foreground="green")
+            self.status_dot.config(fg=self.colors['success'])
+            self.connection_status.config(
+                text="Connected",
+                fg=self.colors['success']
+            )
             self._log("✓ Connected to Logic Pro")
             self._update_status("Connected")
         else:
-            self.connection_status.config(text="Failed", foreground="red")
+            self.status_dot.config(fg=self.colors['error'])
+            self.connection_status.config(
+                text="Connection Failed",
+                fg=self.colors['error']
+            )
             self._log("✗ Failed to connect to Logic Pro")
             self._update_status("Connection failed")
             messagebox.showerror("Connection Error", "Could not connect to Logic Pro. Is it running?")

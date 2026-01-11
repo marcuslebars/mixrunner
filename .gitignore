@@ -62,6 +62,14 @@ temp/
 .AppleDouble
 .LSOverride
 
+# API Keys and Secrets
+*.key
+.env
+.env.*
+config/api_keys.yaml
+config/api_keys.json
+**/*api*key*
+
 # Project specific
 config/local_settings.yaml
 user_presets/

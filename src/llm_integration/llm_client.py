@@ -3,6 +3,8 @@ LLM Client - Unified interface for Claude, GPT, and Gemini
 """
 
 import os
+import yaml
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 from enum import Enum
 from loguru import logger
@@ -42,14 +44,43 @@ class LLMClient:
         self._initialize_client()
 
     def _get_api_key(self) -> Optional[str]:
-        """Get API key from environment"""
+        """Get API key from config file or environment"""
+        # First try to load from config file
+        config_path = Path(__file__).parent.parent.parent / "config" / "api_keys.yaml"
+
+        if config_path.exists():
+            try:
+                with open(config_path, 'r') as f:
+                    config = yaml.safe_load(f)
+
+                provider_map = {
+                    LLMProvider.CLAUDE: "anthropic",
+                    LLMProvider.GPT: "openai",
+                    LLMProvider.GEMINI: "google"
+                }
+
+                provider_key = provider_map.get(self.provider)
+                if provider_key and config and provider_key in config:
+                    api_key = config[provider_key].get('api_key')
+                    if api_key:
+                        logger.info(f"Loaded {self.provider.value} API key from config file")
+                        return api_key
+            except Exception as e:
+                logger.warning(f"Could not load API key from config: {e}")
+
+        # Fallback to environment variable
         key_map = {
             LLMProvider.CLAUDE: "ANTHROPIC_API_KEY",
             LLMProvider.GPT: "OPENAI_API_KEY",
             LLMProvider.GEMINI: "GOOGLE_API_KEY"
         }
         env_var = key_map.get(self.provider)
-        return os.getenv(env_var)
+        env_key = os.getenv(env_var)
+
+        if env_key:
+            logger.info(f"Loaded {self.provider.value} API key from environment")
+
+        return env_key
 
     def _get_default_model(self) -> str:
         """Get default model for provider"""
