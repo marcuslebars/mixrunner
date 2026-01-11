@@ -24,3 +24,8 @@ dataclasses-json>=0.6.0
 
 # Note: pyobjc packages are macOS-only and removed for Windows compatibility
 # When running on macOS, Logic Pro integration will work automatically
+
+# LLM Integration (for AI-powered mixing)
+anthropic>=0.18.0  # Claude API
+openai>=1.12.0     # GPT API
+google-generativeai>=0.3.0  # Gemini API

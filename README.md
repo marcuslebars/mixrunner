@@ -1,109 +1,80 @@
-# Mixrunner - Logic Pro Session Optimizer
+# 🎚️ Mixrunner - AI-Powered Mixing Assistant
 
-An intelligent AI-powered tool that automatically prepares Logic Pro sessions for mixing by cleaning, organizing, and technically normalizing tracks.
+Professional mixing engineer powered by Claude, GPT, or Gemini AI.
 
-## Features
+## 🤖 LLM-Powered Mixing
 
-### 🧹 Automatic Session Cleanup
-- Removes empty tracks and unused regions
-- Consolidates duplicate plugins
-- Cleans up unused automation
-- Removes silent audio files
-- Optimizes take folders
+- **Claude/GPT/Gemini**: AI analyzes tracks and provides expert mixing advice
+- **Smart Recommendations**: EQ, compression, panning, effects
+- **Complete Workflows**: Step-by-step mixing plans
 
-### 🎯 AI-Powered Track Organization
-- Intelligent track categorization (drums, bass, vocals, etc.)
-- Automatic color coding by instrument type
-- Smart track ordering and grouping
-- Bus/Aux creation and routing
-- VCA/summing stack setup
+## ✨ Key Features
 
-### ⚙️ Technical Normalization
-- Phase alignment detection and correction
-- Gain staging optimization
-- Peak normalization with headroom preservation
-- Stereo width analysis and correction
-- Latency compensation verification
+### Import & Analyze
+- Import individual tracks with AI analysis
+- Scan current Logic Pro workspace
+- Get instant mixing recommendations
 
-### 🎨 Mix Template Application
-- Auto-creates organized track stacks
-- Sets up send/return effects
-- Applies naming conventions
-- Configures output routing
-- Generates session notes
+### AI Mixing Tasks
+- **EQ**: Frequency analysis and precise adjustments
+- **Dynamics**: Compression/limiting recommendations
+- **Panning**: Optimal stereo placement
+- **Effects**: Reverb/delay suggestions
+- **Automation**: AI-generated parameter curves
+- **Bus Processing**: Automatic routing and grouping
 
-## Project Structure
-
-```
-mixrunner/
-├── src/
-│   ├── logic-interface/     # Logic Pro scripting and API
-│   ├── ai-engine/           # ML models for track classification
-│   ├── analyzers/           # Audio analysis algorithms
-│   ├── processors/          # Session modification engines
-│   ├── ui/                  # User interface components
-│   └── utils/               # Helper functions
-├── models/                  # Pre-trained AI models
-├── presets/                 # Mix templates and configurations
-├── scripts/                 # Logic Pro scripts
-└── tests/                   # Test suite
-```
-
-## Technology Stack
-
-- **Core**: Python 3.11+
-- **Audio Analysis**: librosa, essentia, pyloudnorm
-- **AI/ML**: TensorFlow/PyTorch for track classification
-- **Logic Pro Interface**: AppleScript/JXA, MIDI scripting
-- **UI**: Tkinter/PyQt for control panel
-- **Config**: YAML for settings and presets
-
-## Installation
+## 🚀 Quick Start
 
 ```bash
+# Install
 pip install -r requirements.txt
-python setup.py install
+
+# Set API key (choose one)
+export ANTHROPIC_API_KEY="your-key"  # Claude
+export OPENAI_API_KEY="your-key"     # GPT-4
+export GOOGLE_API_KEY="your-key"     # Gemini
+
+# Launch
+python run_gui.py
 ```
 
-## Quick Start
+## 💡 Usage
 
 ```python
-from mixrunner import MixReadinessEngine
+from src.mixing_features import TrackImporter
+from src.llm_integration import MixingAgent, LLMProvider
 
-# Initialize the engine
-engine = MixReadinessEngine()
+# Import and analyze track
+importer = TrackImporter(use_ai=True, llm_provider=LLMProvider.CLAUDE)
+result = importer.import_track("vocal.wav", analyze=True)
 
-# Analyze and prepare session
-engine.analyze_session("/path/to/project.logicx")
-report = engine.generate_report()
+# Get AI recommendations
+print(result['ai_analysis']['ai_recommendations'])
 
-# Apply optimizations
-engine.apply_cleanup()
-engine.organize_tracks()
-engine.normalize_technical()
-
-# Export results
-engine.export_session()
+# Scan Logic Pro workspace
+workspace = importer.get_current_workspace_info()
+print(f"Connected to {workspace['track_count']} tracks")
 ```
 
-## Configuration
+## 📚 Documentation
 
-Edit `config/settings.yaml` to customize:
-- Track organization rules
-- Color schemes
-- Naming conventions
-- Headroom targets
-- Bus templates
+- [Installation Guide](INSTALLATION.md)
+- [Usage Guide](USAGE_GUIDE.md)  
+- [Project Overview](PROJECT_OVERVIEW.md)
 
-## Supported Logic Pro Versions
+## 🔑 Get API Keys
 
+- **Claude**: https://console.anthropic.com/
+- **GPT-4**: https://platform.openai.com/api-keys
+- **Gemini**: https://makersuite.google.com/app/apikey
+
+## ⚙️ Requirements
+
+- macOS 10.15+ (Logic Pro)
+- Python 3.11+
 - Logic Pro 10.8+
-- Logic Pro 11.x
+- LLM API key
 
-## License
+## 📝 License
 
-MIT License - see LICENSE file
-
-## Contributing
-
-Contributions welcome! See CONTRIBUTING.md for guidelines.
+MIT License
