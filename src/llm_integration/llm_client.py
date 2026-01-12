@@ -85,7 +85,7 @@ class LLMClient:
     def _get_default_model(self) -> str:
         """Get default model for provider"""
         models = {
-            LLMProvider.CLAUDE: "claude-3-5-sonnet-20241022",
+            LLMProvider.CLAUDE: "claude-3-haiku-20240307",  # Using Haiku - Sonnet requires different API tier
             LLMProvider.GPT: "gpt-4-turbo-preview",
             LLMProvider.GEMINI: "gemini-1.5-pro"
         }
