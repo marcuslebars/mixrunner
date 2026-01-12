@@ -111,11 +111,11 @@ class MixrunnerEngine:
         self.session_reader.read_session()
 
         # Initialize track manager
-        self.track_manager = TrackManager(self.logic_controller)
+        self.track_manager = TrackManager(self.ableton_controller)
 
         # Initialize session cleaner
         self.session_cleaner = SessionCleaner(
-            self.logic_controller,
+            self.ableton_controller,
             self.session_reader
         )
 
@@ -151,12 +151,12 @@ class MixrunnerEngine:
 
     def _classify_tracks(self):
         """Classify all tracks in session"""
-        track_count = self.logic_controller.get_track_count()
+        track_count = self.ableton_controller.get_track_count()
 
         tracks_to_classify = []
 
         for i in range(1, track_count + 1):
-            track_info = self.logic_controller.get_track_info(i)
+            track_info = self.ableton_controller.get_track_info(i)
             tracks_to_classify.append({
                 'index': i,
                 'name': track_info.get('name', ''),
@@ -331,7 +331,7 @@ class MixrunnerEngine:
         """Save optimized session"""
         logger.info("Saving optimized session...")
 
-        success = self.logic_controller.save_project()
+        success = self.ableton_controller.save_project()
 
         if success:
             logger.info("Session saved successfully")
