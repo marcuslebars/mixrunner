@@ -18,7 +18,7 @@ class AbletonController:
     Provides high-level interface for session manipulation
     """
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 11000, receive_port: int = 11001):
+    def __init__(self, host: str = "127.0.0.1", port: int = 11000, receive_port: int = 11001, try_port_discovery: bool = True):
         """
         Initialize Ableton Live controller
 
@@ -26,7 +26,9 @@ class AbletonController:
             host: Host address for OSC communication
             port: Port for sending OSC messages to Ableton (default 11000)
             receive_port: Port for receiving OSC responses (default 11001)
+            try_port_discovery: Automatically try common port configurations if default fails
         """
+        self.try_port_discovery = try_port_discovery
         self.app_name = "Ableton Live 12"
         self.host = host
         self.port = port
