@@ -7,7 +7,7 @@ from typing import List, Dict, Optional, Any
 from loguru import logger
 import soundfile as sf
 
-from ..logic_interface import LogicController
+from ..ableton_interface import AbletonController
 from ..ai_engine import TrackClassifier
 from ..llm_integration import MixingAgent, LLMProvider
 
@@ -19,7 +19,7 @@ class TrackImporter:
 
     def __init__(
         self,
-        logic_controller: Optional[LogicController] = None,
+        ableton_controller: Optional[AbletonController] = None,
         use_ai: bool = True,
         llm_provider: LLMProvider = LLMProvider.CLAUDE
     ):
@@ -27,11 +27,11 @@ class TrackImporter:
         Initialize track importer
 
         Args:
-            logic_controller: Logic Pro controller instance
+            ableton_controller: Ableton Live controller instance
             use_ai: Whether to use AI analysis
             llm_provider: Which LLM to use for AI analysis
         """
-        self.logic = logic_controller or LogicController()
+        self.ableton = ableton_controller or AbletonController()
         self.classifier = TrackClassifier()
         self.use_ai = use_ai
 
@@ -50,7 +50,7 @@ class TrackImporter:
         analyze: bool = True
     ) -> Dict[str, Any]:
         """
-        Import a single track into the current Logic Pro session
+        Import a single track into the current Ableton Live session
 
         Args:
             audio_path: Path to audio file
@@ -193,29 +193,29 @@ class TrackImporter:
 
     def get_current_workspace_info(self) -> Dict[str, Any]:
         """
-        Scan and connect to current Logic Pro workspace
+        Scan and connect to current Ableton Live workspace
 
         Returns:
             Information about current workspace
         """
-        logger.info("Scanning current Logic Pro workspace...")
+        logger.info("Scanning current Ableton Live workspace...")
 
-        if not self.logic.connect():
+        if not self.ableton.connect():
             return {
                 'connected': False,
-                'error': 'Could not connect to Logic Pro'
+                'error': 'Could not connect to Ableton Live'
             }
 
         # Get project path
-        project_path = self.logic.get_current_project_path()
+        project_path = self.ableton.get_current_project_path()
 
         # Get track count
-        track_count = self.logic.get_track_count()
+        track_count = self.ableton.get_track_count()
 
         # Get all track info
         tracks = []
-        for i in range(1, track_count + 1):
-            track_info = self.logic.get_track_info(i)
+        for i in range(track_count):
+            track_info = self.ableton.get_track_info(i)
             tracks.append(track_info)
 
         workspace_info = {
@@ -231,7 +231,7 @@ class TrackImporter:
 
     def sync_with_workspace(self) -> bool:
         """
-        Synchronize with current Logic Pro workspace
+        Synchronize with current Ableton Live workspace
 
         Returns:
             Success status
@@ -239,9 +239,9 @@ class TrackImporter:
         workspace = self.get_current_workspace_info()
 
         if not workspace.get('connected'):
-            logger.error("Not connected to Logic Pro")
+            logger.error("Not connected to Ableton Live")
             return False
 
         # Update internal state based on workspace
-        logger.info("Synchronized with Logic Pro workspace")
+        logger.info("Synchronized with Ableton Live workspace")
         return True

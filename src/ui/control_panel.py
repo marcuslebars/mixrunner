@@ -19,7 +19,7 @@ class MixreadyControlPanel:
     def __init__(self, root: Optional[tk.Tk] = None):
         if root is None:
             self.root = tk.Tk()
-            self.root.title("Mixrunner AI - Logic Pro Session Optimizer")
+            self.root.title("Mixrunner AI - Ableton Live Session Optimizer")
             self.root.geometry("900x950")
         else:
             self.root = root
@@ -137,7 +137,7 @@ class MixreadyControlPanel:
 
         subtitle = tk.Label(
             header_frame,
-            text="Intelligent Logic Pro Session Optimizer",
+            text="Intelligent Ableton Live Session Optimizer",
             font=('Helvetica', 13),
             bg=self.colors['bg_medium'],
             fg=self.colors['text_dim']
@@ -167,12 +167,12 @@ class MixreadyControlPanel:
 
     def _build_connection_section(self, parent, row):
         """Build connection controls"""
-        frame = ttk.LabelFrame(parent, text="  LOGIC PRO CONNECTION  ", padding="15")
+        frame = ttk.LabelFrame(parent, text="  ABLETON LIVE CONNECTION  ", padding="15")
         frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
 
         self.connect_btn = ttk.Button(
             frame,
-            text="⚡ Connect to Logic Pro",
+            text="⚡ Connect to Ableton Live",
             command=self._connect_to_logic,
             width=25
         )
@@ -368,9 +368,10 @@ class MixreadyControlPanel:
         self.root.update_idletasks()
 
     def _connect_to_logic(self):
-        """Connect to Logic Pro"""
-        self._update_status("Connecting to Logic Pro...")
-        self._log("Connecting to Logic Pro...")
+        """Connect to Ableton Live"""
+        self._update_status("Connecting to Ableton Live...")
+        self._log("Connecting to Ableton Live...")
+        self._log("Make sure Ableton Live is running with the MIDI Remote Script installed...")
 
         success = self.engine.connect_to_logic()
 
@@ -381,7 +382,7 @@ class MixreadyControlPanel:
                 text="Connected",
                 fg=self.colors['success']
             )
-            self._log("✓ Connected to Logic Pro")
+            self._log("✓ Connected to Ableton Live")
             self._update_status("Connected")
         else:
             self.status_dot.config(fg=self.colors['error'])
@@ -389,14 +390,14 @@ class MixreadyControlPanel:
                 text="Connection Failed",
                 fg=self.colors['error']
             )
-            self._log("✗ Failed to connect to Logic Pro")
+            self._log("✗ Failed to connect to Ableton Live")
             self._update_status("Connection failed")
-            messagebox.showerror("Connection Error", "Could not connect to Logic Pro. Is it running?")
+            messagebox.showerror("Connection Error", "Could not connect to Ableton Live. Is it running with the MIDI Remote Script?")
 
     def _analyze_session(self):
         """Analyze current session"""
         if not self.is_connected:
-            messagebox.showwarning("Not Connected", "Please connect to Logic Pro first")
+            messagebox.showwarning("Not Connected", "Please connect to Ableton Live first")
             return
 
         def analyze():
@@ -421,7 +422,7 @@ class MixreadyControlPanel:
     def _cleanup_session(self):
         """Clean up session"""
         if not self.is_connected:
-            messagebox.showwarning("Not Connected", "Please connect to Logic Pro first")
+            messagebox.showwarning("Not Connected", "Please connect to Ableton Live first")
             return
 
         def cleanup():
@@ -442,7 +443,7 @@ class MixreadyControlPanel:
     def _organize_tracks(self):
         """Organize tracks"""
         if not self.is_connected:
-            messagebox.showwarning("Not Connected", "Please connect to Logic Pro first")
+            messagebox.showwarning("Not Connected", "Please connect to Ableton Live first")
             return
 
         def organize():
@@ -463,7 +464,7 @@ class MixreadyControlPanel:
     def _normalize_audio(self):
         """Normalize audio"""
         if not self.is_connected:
-            messagebox.showwarning("Not Connected", "Please connect to Logic Pro first")
+            messagebox.showwarning("Not Connected", "Please connect to Ableton Live first")
             return
 
         def normalize():
@@ -484,7 +485,7 @@ class MixreadyControlPanel:
     def _run_full_workflow(self):
         """Run complete workflow"""
         if not self.is_connected:
-            messagebox.showwarning("Not Connected", "Please connect to Logic Pro first")
+            messagebox.showwarning("Not Connected", "Please connect to Ableton Live first")
             return
 
         response = messagebox.askyesno(

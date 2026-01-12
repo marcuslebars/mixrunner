@@ -1,8 +1,8 @@
 """
-Session Reader - Reads and parses Logic Pro session data
+Session Reader - Reads and parses Ableton Live session data
 """
 
-import plistlib
+import gzip
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -12,7 +12,7 @@ from loguru import logger
 
 @dataclass
 class AudioRegion:
-    """Represents an audio region in Logic Pro"""
+    """Represents an audio clip in Ableton Live"""
     name: str
     start_position: float
     length: float
@@ -47,8 +47,8 @@ class TrackData:
 
 class SessionReader:
     """
-    Reads Logic Pro session files and extracts data
-    Logic Pro sessions are stored as packages (.logicx)
+    Reads Ableton Live session files and extracts data
+    Ableton Live sessions are stored as compressed XML (.als files)
     """
 
     def __init__(self, project_path: Path):
@@ -57,49 +57,72 @@ class SessionReader:
         self.tracks: List[TrackData] = []
 
     def read_session(self) -> bool:
-        """Read and parse Logic Pro session"""
+        """Read and parse Ableton Live session"""
         try:
             if not self.project_path.exists():
                 logger.error(f"Project not found: {self.project_path}")
                 return False
 
-            # Logic Pro X uses a package format
-            if self.project_path.suffix == '.logicx':
-                return self._read_logicx_session()
+            # Ableton Live uses .als format (gzipped XML)
+            if self.project_path.suffix == '.als':
+                return self._read_als_session()
             else:
-                logger.error("Unsupported project format")
+                logger.error("Unsupported project format (expected .als)")
                 return False
 
         except Exception as e:
             logger.error(f"Failed to read session: {e}")
             return False
 
-    def _read_logicx_session(self) -> bool:
-        """Read Logic Pro X package format"""
+    def _read_als_session(self) -> bool:
+        """Read Ableton Live .als format (gzipped XML)"""
         try:
-            # Main project file locations
-            alternatives_path = self.project_path / "Alternatives"
-            resources_path = self.project_path / "Resources"
-            media_path = self.project_path / "Media"
+            logger.info(f"Reading Ableton Live project: {self.project_path.name}")
 
-            # Try to find project data
-            # Logic uses various internal formats, this is a simplified reader
-            logger.info(f"Reading Logic Pro X project: {self.project_path.name}")
+            # Read and decompress the .als file
+            with gzip.open(self.project_path, 'rb') as f:
+                xml_content = f.read()
 
-            # Read audio files
-            audio_files = self._get_audio_files(media_path)
+            # Parse XML
+            root = ET.fromstring(xml_content)
+
+            # Extract project information
+            project_name = self.project_path.stem
+
+            # Find the LiveSet element
+            liveset = root.find('LiveSet')
+            if liveset is None:
+                logger.error("Invalid .als file: LiveSet element not found")
+                return False
+
+            # Extract tempo
+            tempo_element = liveset.find('.//MasterTrack/DeviceChain/Mixer/Tempo/Manual')
+            tempo = float(tempo_element.get('Value', '120')) if tempo_element is not None else 120.0
+
+            # Extract sample rate
+            sample_rate_element = liveset.find('.//SampleRate')
+            sample_rate = int(sample_rate_element.get('Value', '48000')) if sample_rate_element is not None else 48000
+
+            # Find the project folder for audio files
+            project_folder = self.project_path.parent
+            samples_folder = project_folder / "Samples" / "Recorded"
+
+            # Get audio files
+            audio_files = self._get_audio_files(samples_folder)
             logger.info(f"Found {len(audio_files)} audio files")
 
             self.session_data = {
-                'project_name': self.project_path.stem,
+                'project_name': project_name,
                 'audio_files': audio_files,
-                'sample_rate': self._detect_sample_rate(audio_files),
+                'sample_rate': sample_rate,
+                'tempo': tempo,
+                'xml_root': root
             }
 
             return True
 
         except Exception as e:
-            logger.error(f"Failed to read .logicx format: {e}")
+            logger.error(f"Failed to read .als format: {e}")
             return False
 
     def _get_audio_files(self, media_path: Path) -> List[Path]:

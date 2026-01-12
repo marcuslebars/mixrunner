@@ -4,7 +4,7 @@ Track Manager - High-level track manipulation operations
 
 from typing import List, Dict, Optional, Callable
 from loguru import logger
-from .logic_controller import LogicController
+from .ableton_controller import AbletonController
 from .session_reader import TrackData
 
 
@@ -13,24 +13,24 @@ class TrackManager:
     Manages track operations including organization, grouping, and routing
     """
 
-    # Logic Pro color indices for different track types
+    # Ableton Live color indices for different track types (0-69)
     COLOR_SCHEME = {
         'drums': 1,      # Red
-        'bass': 6,       # Purple
+        'bass': 55,      # Purple
         'guitar': 9,     # Orange
-        'keys': 12,      # Yellow
-        'vocals': 18,    # Pink
-        'lead_vocal': 19, # Bright pink
-        'bgv': 20,       # Light pink
-        'strings': 15,   # Green
+        'keys': 13,      # Yellow
+        'vocals': 56,    # Pink
+        'lead_vocal': 57, # Bright pink
+        'bgv': 58,       # Light pink
+        'strings': 25,   # Green
         'brass': 8,      # Brown
-        'fx': 25,        # Blue
-        'bus': 28,       # Gray
-        'aux': 28,       # Gray
+        'fx': 41,        # Blue
+        'bus': 17,       # Gray
+        'return': 17,    # Gray (Ableton uses 'return' instead of 'aux')
         'default': 0,    # No color
     }
 
-    def __init__(self, controller: LogicController):
+    def __init__(self, controller: AbletonController):
         self.controller = controller
 
     def organize_tracks_by_type(self, track_classifications: Dict[int, str]) -> bool:

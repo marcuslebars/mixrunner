@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 from loguru import logger
 import sys
 
-from .logic_interface import LogicController, SessionReader, TrackManager
+from .ableton_interface import AbletonController, SessionReader, TrackManager
 from .ai_engine import TrackClassifier, AudioFeatureExtractor
 from .analyzers import PhaseAnalyzer, GainAnalyzer, FrequencyAnalyzer
 from .processors import SessionCleaner, AudioNormalizer
@@ -15,7 +15,7 @@ from .processors import SessionCleaner, AudioNormalizer
 
 class MixrunnerEngine:
     """
-    Main engine that orchestrates the complete mix preparation workflow
+    Main engine that orchestrates the complete mix preparation workflow for Ableton Live 12
     """
 
     def __init__(self, config: Optional[Dict] = None):
@@ -28,7 +28,7 @@ class MixrunnerEngine:
         self.config = config or self._default_config()
 
         # Initialize components
-        self.logic_controller = LogicController()
+        self.ableton_controller = AbletonController()
         self.session_reader: Optional[SessionReader] = None
         self.track_manager: Optional[TrackManager] = None
         self.track_classifier = TrackClassifier()
@@ -53,7 +53,7 @@ class MixrunnerEngine:
         self.analysis_results: Dict = {}
         self.track_classifications: Dict = {}
 
-        logger.info("Mix Readiness Engine initialized")
+        logger.info("Mixrunner Engine initialized for Ableton Live 12")
 
     def _default_config(self) -> Dict:
         """Default configuration"""
@@ -69,23 +69,23 @@ class MixrunnerEngine:
         }
 
     def connect_to_logic(self) -> bool:
-        """Connect to Logic Pro"""
-        logger.info("Connecting to Logic Pro...")
-        success = self.logic_controller.connect()
+        """Connect to Ableton Live (keeping method name for compatibility)"""
+        logger.info("Connecting to Ableton Live...")
+        success = self.ableton_controller.connect()
 
         if success:
-            logger.info("Connected to Logic Pro")
+            logger.info("Connected to Ableton Live")
         else:
-            logger.error("Failed to connect to Logic Pro")
+            logger.error("Failed to connect to Ableton Live")
 
         return success
 
     def analyze_session(self, project_path: Optional[Path] = None) -> Dict:
         """
-        Analyze current Logic Pro session
+        Analyze current Ableton Live session
 
         Args:
-            project_path: Optional path to project file
+            project_path: Optional path to project file (.als)
 
         Returns:
             Comprehensive analysis results
@@ -98,10 +98,10 @@ class MixrunnerEngine:
         if project_path:
             self.project_path = Path(project_path)
         else:
-            self.project_path = self.logic_controller.get_current_project_path()
+            self.project_path = self.ableton_controller.get_current_project_path()
 
         if not self.project_path:
-            logger.error("No project loaded in Logic Pro")
+            logger.error("No project loaded in Ableton Live")
             return {}
 
         logger.info(f"Project: {self.project_path.name}")

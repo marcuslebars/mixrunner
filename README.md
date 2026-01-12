@@ -1,6 +1,6 @@
 # 🎚️ Mixrunner - AI-Powered Mixing Assistant
 
-Professional mixing engineer powered by Claude, GPT, or Gemini AI.
+Professional mixing engineer powered by Claude, GPT, or Gemini AI for Ableton Live 12.
 
 ## 🤖 LLM-Powered Mixing
 
@@ -12,7 +12,7 @@ Professional mixing engineer powered by Claude, GPT, or Gemini AI.
 
 ### Import & Analyze
 - Import individual tracks with AI analysis
-- Scan current Logic Pro workspace
+- Scan current Ableton Live workspace
 - Get instant mixing recommendations
 
 ### AI Mixing Tasks
@@ -51,7 +51,7 @@ result = importer.import_track("vocal.wav", analyze=True)
 # Get AI recommendations
 print(result['ai_analysis']['ai_recommendations'])
 
-# Scan Logic Pro workspace
+# Scan Ableton Live workspace
 workspace = importer.get_current_workspace_info()
 print(f"Connected to {workspace['track_count']} tracks")
 ```
@@ -59,7 +59,7 @@ print(f"Connected to {workspace['track_count']} tracks")
 ## 📚 Documentation
 
 - [Installation Guide](INSTALLATION.md)
-- [Usage Guide](USAGE_GUIDE.md)  
+- [Usage Guide](USAGE_GUIDE.md)
 - [Project Overview](PROJECT_OVERVIEW.md)
 
 ## 🔑 Get API Keys
@@ -70,10 +70,11 @@ print(f"Connected to {workspace['track_count']} tracks")
 
 ## ⚙️ Requirements
 
-- macOS 10.15+ (Logic Pro)
+- Windows 10/11 or macOS 10.15+
 - Python 3.11+
-- Logic Pro 10.8+
+- Ableton Live 12
 - LLM API key
+- MIDI Remote Script (for OSC communication)
 
 ## 📝 License
 
