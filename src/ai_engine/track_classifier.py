@@ -116,6 +116,10 @@ class TrackClassifier:
         if not track_name:
             return 'other', 0.0
 
+        # Ensure track_name is a string (defensive programming for OSC responses)
+        if not isinstance(track_name, str):
+            track_name = str(track_name)
+
         name_lower = track_name.lower()
 
         # Keyword mapping with confidence weights

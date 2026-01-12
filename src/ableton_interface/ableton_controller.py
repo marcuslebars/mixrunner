@@ -139,12 +139,15 @@ class AbletonController:
                     return response['args'][0]
                 return default
 
+            # Get values with proper type conversion
+            name_val = get_value(name_response, f'Track {track_index + 1}')
+
             return {
                 'index': track_index,
-                'name': get_value(name_response, f'Track {track_index + 1}'),
-                'muted': get_value(mute_response, False),
-                'solo': get_value(solo_response, False),
-                'color': get_value(color_response, 0),
+                'name': str(name_val) if name_val is not None else f'Track {track_index + 1}',
+                'muted': bool(get_value(mute_response, False)),
+                'solo': bool(get_value(solo_response, False)),
+                'color': int(get_value(color_response, 0)),
             }
         except Exception as e:
             logger.error(f"Failed to get track {track_index} info: {e}")
