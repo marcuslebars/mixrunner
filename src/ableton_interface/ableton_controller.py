@@ -2,12 +2,14 @@
 Ableton Live Controller - Main interface for communicating with Ableton Live 12
 """
 
-import socket
-import json
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from loguru import logger
+from pythonosc import udp_client
+from pythonosc.dispatcher import Dispatcher
+from pythonosc.osc_server import ThreadingOSCUDPServer
+import threading
 
 
 class AbletonController:
@@ -16,60 +18,85 @@ class AbletonController:
     Provides high-level interface for session manipulation
     """
 
-    def __init__(self, host: str = "127.0.0.1", port: int = 11000):
+    def __init__(self, host: str = "127.0.0.1", port: int = 11000, receive_port: int = 11001):
         """
         Initialize Ableton Live controller
 
         Args:
             host: Host address for OSC communication
-            port: Port for OSC communication (default 11000)
+            port: Port for sending OSC messages to Ableton (default 11000)
+            receive_port: Port for receiving OSC responses (default 11001)
         """
         self.app_name = "Ableton Live 12"
         self.host = host
         self.port = port
+        self.receive_port = receive_port
         self.is_connected = False
         self.current_project_path: Optional[Path] = None
-        self.socket = None
+
+        # OSC client for sending messages to Ableton
+        self.osc_client = None
+
+        # OSC server for receiving responses from Ableton
+        self.osc_server = None
+        self.server_thread = None
+        self.dispatcher = Dispatcher()
+
+        # Storage for responses
+        self.last_response = None
+        self.response_received = threading.Event()
 
     def connect(self) -> bool:
         """Establish connection to Ableton Live"""
         try:
-            # Try to establish socket connection for OSC
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.socket.settimeout(2.0)
+            # Initialize OSC client for sending messages
+            self.osc_client = udp_client.SimpleUDPClient(self.host, self.port)
 
-            # Send ping to check if Ableton is running and responsive
-            response = self._send_command('/live/test')
+            # Set up dispatcher for receiving responses
+            self.dispatcher.map("/live/*", self._handle_response)
+            self.dispatcher.set_default_handler(self._handle_response)
 
-            if response:
-                self.is_connected = True
-                logger.info(f"Ableton Live connection: {self.is_connected}")
-                return True
-            else:
-                # Even if no response, mark as connected for now
-                # The user needs to have the MIDI Remote Script installed
-                self.is_connected = True
-                logger.warning("Ableton Live connection established (no response, ensure MIDI Remote Script is installed)")
-                return True
+            # Start OSC server for receiving responses
+            self.osc_server = ThreadingOSCUDPServer(
+                (self.host, self.receive_port),
+                self.dispatcher
+            )
+            self.server_thread = threading.Thread(target=self.osc_server.serve_forever, daemon=True)
+            self.server_thread.start()
+
+            # Send test message to check if Ableton is responsive
+            self.osc_client.send_message("/live/test", [])
+            time.sleep(0.1)  # Brief wait for response
+
+            self.is_connected = True
+            logger.info(f"Connected to Ableton Live on port {self.port}")
+            logger.info(f"Listening for responses on port {self.receive_port}")
+            return True
 
         except Exception as e:
             logger.error(f"Failed to connect to Ableton Live: {e}")
-            logger.info("Make sure Ableton Live is running and the MIDI Remote Script is installed")
+            logger.info("Make sure Ableton Live is running and AbletonOSC is installed")
             return False
+
+    def _handle_response(self, address, *args):
+        """Handle incoming OSC messages from Ableton"""
+        self.last_response = {'address': address, 'args': args}
+        self.response_received.set()
 
     def disconnect(self):
         """Close connection to Ableton Live"""
-        if self.socket:
-            self.socket.close()
-            self.socket = None
+        if self.osc_server:
+            self.osc_server.shutdown()
+            self.osc_server = None
+        self.osc_client = None
         self.is_connected = False
 
     def get_current_project_path(self) -> Optional[Path]:
         """Get path to currently open Ableton Live project"""
         try:
             response = self._send_command('/live/song/get/file_path')
-            if response:
-                path_str = response.get('value', '')
+            if response and response.get('args'):
+                path_str = response['args'][0] if response['args'] else ''
                 if path_str:
                     self.current_project_path = Path(path_str)
                     return self.current_project_path
@@ -82,8 +109,8 @@ class AbletonController:
         """Get total number of tracks in current project"""
         try:
             response = self._send_command('/live/song/get/num_tracks')
-            if response:
-                count = response.get('value', 0)
+            if response and response.get('args'):
+                count = response['args'][0] if response['args'] else 0
                 return int(count)
             return 0
         except Exception as e:
@@ -105,12 +132,17 @@ class AbletonController:
             # Get track color
             color_response = self._send_command(f'/live/track/get/color', {'track': track_index})
 
+            def get_value(response, default):
+                if response and response.get('args'):
+                    return response['args'][0]
+                return default
+
             return {
                 'index': track_index,
-                'name': name_response.get('value', '') if name_response else f'Track {track_index + 1}',
-                'muted': mute_response.get('value', False) if mute_response else False,
-                'solo': solo_response.get('value', False) if solo_response else False,
-                'color': color_response.get('value', 0) if color_response else 0,
+                'name': get_value(name_response, f'Track {track_index + 1}'),
+                'muted': get_value(mute_response, False),
+                'solo': get_value(solo_response, False),
+                'color': get_value(color_response, 0),
             }
         except Exception as e:
             logger.error(f"Failed to get track {track_index} info: {e}")
@@ -212,8 +244,8 @@ class AbletonController:
         """Get current project tempo"""
         try:
             response = self._send_command('/live/song/get/tempo')
-            if response:
-                return float(response.get('value', 120.0))
+            if response and response.get('args'):
+                return float(response['args'][0])
             return 120.0
         except Exception as e:
             logger.error(f"Failed to get tempo: {e}")
@@ -233,8 +265,8 @@ class AbletonController:
         """Get track volume (0.0 to 1.0)"""
         try:
             response = self._send_command('/live/track/get/volume', {'track': track_index})
-            if response:
-                return float(response.get('value', 0.85))
+            if response and response.get('args'):
+                return float(response['args'][0])
             return 0.85
         except Exception as e:
             logger.error(f"Failed to get track volume: {e}")
@@ -257,8 +289,8 @@ class AbletonController:
         """Get track pan (-1.0 to 1.0, 0 is center)"""
         try:
             response = self._send_command('/live/track/get/panning', {'track': track_index})
-            if response:
-                return float(response.get('value', 0.0))
+            if response and response.get('args'):
+                return float(response['args'][0])
             return 0.0
         except Exception as e:
             logger.error(f"Failed to get track pan: {e}")
@@ -277,38 +309,47 @@ class AbletonController:
             logger.error(f"Failed to set track pan: {e}")
             return False
 
-    def _send_command(self, address: str, params: Optional[Dict] = None) -> Optional[Dict]:
+    def _send_command(self, address: str, params: Optional[Dict] = None, timeout: float = 1.0) -> Optional[Dict]:
         """
         Send OSC command to Ableton Live
 
         Args:
             address: OSC address (e.g., '/live/song/get/tempo')
             params: Optional parameters dictionary
+            timeout: Time to wait for response in seconds
 
         Returns:
             Response dictionary or None
         """
         try:
-            if not self.socket:
+            if not self.osc_client:
                 return None
 
-            # Build OSC message
-            message = {
-                'address': address,
-                'args': params or {}
-            }
+            # Clear previous response
+            self.response_received.clear()
+            self.last_response = None
 
-            # Send via UDP
-            message_bytes = json.dumps(message).encode('utf-8')
-            self.socket.sendto(message_bytes, (self.host, self.port))
+            # Build arguments list from params
+            args = []
+            if params:
+                if isinstance(params, dict):
+                    # Convert dict to list of values
+                    for key, value in params.items():
+                        args.append(value)
+                elif isinstance(params, list):
+                    args = params
+                else:
+                    args = [params]
 
-            # Try to receive response (with timeout)
-            try:
-                data, addr = self.socket.recvfrom(4096)
-                response = json.loads(data.decode('utf-8'))
-                return response
-            except socket.timeout:
-                # No response received, return None
+            # Send OSC message
+            self.osc_client.send_message(address, args)
+
+            # Wait for response
+            if self.response_received.wait(timeout):
+                return self.last_response
+            else:
+                # No response within timeout
+                logger.debug(f"No response for {address}")
                 return None
 
         except Exception as e:

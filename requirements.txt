@@ -29,3 +29,6 @@ dataclasses-json>=0.6.0
 anthropic>=0.18.0  # Claude API
 openai>=1.12.0     # GPT API
 google-generativeai>=0.3.0  # Gemini API
+
+# Ableton Live OSC Integration
+python-osc>=1.9.0  # OSC protocol for AbletonOSC communication
