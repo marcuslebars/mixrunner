@@ -51,6 +51,10 @@ class AbletonController:
     def connect(self) -> bool:
         """Establish connection to Ableton Live"""
         try:
+            # Close any existing connection first
+            if self.is_connected:
+                self.disconnect()
+
             # Initialize OSC client for sending messages
             self.osc_client = udp_client.SimpleUDPClient(self.host, self.port)
 
@@ -58,11 +62,15 @@ class AbletonController:
             self.dispatcher.map("/live/*", self._handle_response)
             self.dispatcher.set_default_handler(self._handle_response)
 
-            # Start OSC server for receiving responses
+            # Start OSC server for receiving responses with socket reuse
+            import socket
             self.osc_server = ThreadingOSCUDPServer(
                 (self.host, self.receive_port),
                 self.dispatcher
             )
+            # Allow address reuse to prevent "already in use" errors
+            self.osc_server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
             self.server_thread = threading.Thread(target=self.osc_server.serve_forever, daemon=True)
             self.server_thread.start()
 
@@ -78,6 +86,8 @@ class AbletonController:
         except Exception as e:
             logger.error(f"Failed to connect to Ableton Live: {e}")
             logger.info("Make sure Ableton Live is running and AbletonOSC is installed")
+            # Try to cleanup on failure
+            self.disconnect()
             return False
 
     def _handle_response(self, address, *args):
@@ -87,11 +97,23 @@ class AbletonController:
 
     def disconnect(self):
         """Close connection to Ableton Live"""
-        if self.osc_server:
-            self.osc_server.shutdown()
+        try:
+            if self.osc_server:
+                self.osc_server.shutdown()
+                time.sleep(0.1)  # Give server time to close
+                self.osc_server = None
+            if self.server_thread and self.server_thread.is_alive():
+                self.server_thread = None
+            self.osc_client = None
+            self.is_connected = False
+            logger.debug("Disconnected from Ableton Live")
+        except Exception as e:
+            logger.debug(f"Error during disconnect: {e}")
+            # Force cleanup even if there's an error
             self.osc_server = None
-        self.osc_client = None
-        self.is_connected = False
+            self.server_thread = None
+            self.osc_client = None
+            self.is_connected = False
 
     def get_current_project_path(self) -> Optional[Path]:
         """Get path to currently open Ableton Live project"""
