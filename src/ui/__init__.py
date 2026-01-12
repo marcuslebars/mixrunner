@@ -2,6 +2,6 @@
 User Interface Components
 """
 
-from .control_panel import MixReadinessControlPanel
+from .control_panel import MixreadyControlPanel
 
-__all__ = ['MixReadinessControlPanel']
+__all__ = ['MixreadyControlPanel']

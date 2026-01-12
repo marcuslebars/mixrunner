@@ -6,18 +6,18 @@ from pathlib import Path
 from typing import List, Dict, Set
 from loguru import logger
 
-from ..logic_interface.session_reader import SessionReader, TrackData
-from ..logic_interface.logic_controller import LogicController
+from ..ableton_interface.session_reader import SessionReader, TrackData
+from ..ableton_interface.ableton_controller import AbletonController
 
 
 class SessionCleaner:
     """
-    Cleans and optimizes Logic Pro sessions
+    Cleans and optimizes Ableton Live sessions
     """
 
     def __init__(
         self,
-        controller: LogicController,
+        controller: AbletonController,
         session_reader: SessionReader
     ):
         self.controller = controller

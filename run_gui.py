@@ -25,7 +25,7 @@ logger.add(
 def main():
     """Launch the GUI"""
     print("=" * 70)
-    print("Mixrunner - Logic Pro Session Optimizer")
+    print("Mixrunner - Ableton Live Session Optimizer")
     print("=" * 70)
     print("\nStarting GUI...")
 
